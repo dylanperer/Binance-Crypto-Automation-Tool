@@ -18,15 +18,11 @@ const attachMailListener = (binanceClient) => __awaiter(void 0, void 0, void 0, 
     const configuration = (0, MailConfiguration_1.getMailConfiguration)();
     const mailListener = new mail_listener5_1.MailListener(configuration);
     mailListener.start();
-    mailListener.on("error", onError);
+    mailListener.on("error", () => attachMailListener(binanceClient));
     mailListener.on("server:connected", () => {
         mailListener.on("mail", (mail) => onMail(binanceClient, mail));
     });
 });
-const onError = (e) => {
-    console.log("Mail listener error", e);
-    process.exit(1);
-};
 const onMail = (binanceClient, mail) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, AlertParser_1.parseAlert)(binanceClient, mail === null || mail === void 0 ? void 0 : mail.text);
 });
