@@ -1,0 +1,139 @@
+//@version=4
+
+InitCapital = 100000
+InitPosition = 100
+InitCommission = 0.04
+InitPyramidMax = 0
+CalcOnorderFills = true
+CalcOnTick = true
+DefaultQtyType = strategy.fixed
+DefaultQtyValue = strategy.fixed
+
+strategy("Test 01-STRAT", shorttitle="Test 01-STRAT", overlay=true, 
+ pyramiding=InitPyramidMax, initial_capital=InitCapital, default_qty_value=InitPosition, default_qty_type=strategy.percent_of_equity, commission_type=strategy.commission.percent, 
+ commission_value=InitCommission)
+
+// Inputs
+sum_length     = input(30, title = "EVWMA Length",   type = input.integer)
+vwap_smoothing = input(1,  title = "VWAP Smoothing", type = input.integer)
+
+// Calculate EVWMA
+vol_period = sum(volume, sum_length)
+
+evwma = 0.0
+evwma := ((vol_period - volume) * nz(evwma[1], close) + volume * close) / (vol_period)
+
+vwap_smooth = ema(vwap, vwap_smoothing)
+
+long  = crossover( vwap_smooth, evwma) 
+short = crossunder(vwap_smooth, evwma)
+longExit = crossunder(close, evwma)
+
+plot(evwma,       color = color.blue)
+plot(vwap_smooth, color = color.red)
+
+
+//DATE RANGE
+fromDay = input(defval = 1, title = "From Day", minval = 1, maxval = 31)
+fromMonth = input(defval = 1, title = "From Month", minval = 1, maxval = 12)
+fromYear = input(defval = 2020, title = "From Year", minval = 1)
+
+toDay = input(defval = 1, title = "To Day", minval = 1, maxval = 31)
+toMonth = input(defval = 1, title = "To Month", minval = 1, maxval = 12)
+toYear = input(defval = 2022, title = "To Year", minval = 1)
+
+startDate = timestamp(fromYear, fromMonth, fromDay, 00, 00)
+endDate = timestamp(toYear, toMonth, toDay, 00, 00)
+
+time_cond = time >= startDate and time <= endDate
+
+
+strategy.entry("LONG",  true,  when = long and time_cond)
+strategy.entry("SHORT", false, when = short and time_cond)
+
+
+// strategy.entry("LONG",  true,  when = long)
+// strategy.entry("SHORT", false, when = short)
+// trailling stoploss
+
+// enableLongTraillingstop = input(title="(long) enable trailling stop", type=input.bool, defval=true)
+// longTraillingStopPerc = input(title="Long trailling Stop (%)", type=input.float, minval=0.0, step=0.1, defval=6) * 0.01
+
+// enableShortTraillingstop = input(title="(short) enable trailing stop", type=input.bool, defval=true)
+// shortTraillingStopPerc = input(title="Short trailling Stop (%)", type=input.float, minval=0.0, step=0.1, defval=1) * 0.01
+
+
+    
+// strategy.exit("TRL STOP (Long)", "LONG", stop = enableLongTraillingstop? longStopPrice : na)
+// strategy.exit("TRL STOP (short)", "SHORT", stop = enableShortTraillingstop? shortStopPrice : na)
+
+
+isStoplossLong = input(title="enable stoploss long", type=input.bool, defval=true)
+longStopLossPerc = input(title = "stoploss long %", type=input.float, minval=0.0, step=0.1, defval=5.8) * 0.01
+
+isStoplossShort = input(title="enable stoploss short", type=input.bool, defval=true)
+shortStopLossPerc = input(title = "stoploss short %", type=input.float, minval=0.0, step=0.1, defval=1.5) * 0.01
+
+
+isTakeprofitLong = input(title="enable takeprofit long", type=input.bool, defval=true) 
+takProfitLongPerc = input(title = "Take profit Long %", type=input.float, minval=0.0, step=0.1, defval=5.9) * 0.01
+
+isTakeprofitShort = input(title="enable takeprofit short", type=input.bool, defval=true)
+takeProfitShortPerc = input(title = "Take profit Short %", type=input.float, minval=0.0, step=0.1, defval=0.6) * 0.01
+
+
+
+
+
+// calculate trade stoploss
+stoplossLong = (close * longStopLossPerc) / syminfo.mintick
+stoplossShort = (close * shortStopLossPerc) / syminfo.mintick
+
+trail_points_long=(close * takProfitLongPerc) / syminfo.mintick
+trail_points_short=(close *takeProfitShortPerc) / syminfo.mintick
+
+
+//calculate takeprofit prices
+// longStopPrice = 0.0, shortStopPrice = 0.0
+
+// longStopPrice := if (strategy.position_size > 0)
+//     stopValue =  (close * longStopLossPerc) / syminfo.mintick
+//     max(stopValue, longStopPrice[1])
+// else
+//     0
+
+// shortStopPrice := if (strategy.position_size < 0)
+//     stopValue = close * (1 + shortTraillingStopPerc)
+//     min(stopValue, shortStopPrice[1])
+// else
+//     999999
+
+// if(enableLongTraillingstop)
+//     strategy.exit("Stop Loss Long", "LONG", loss = stoplossLong, stop =longStopPrice )
+// else
+//     strategy.exit("Stop Loss Long", "LONG", loss = stoplossLong,  trail_points=0, trail_offset=trail_points_long)
+// /////////
+// if(isStoplossLong)
+//     strategy.exit("Stop Loss Long", "LONG", loss = stoplossLong, stop = enableLongTraillingstop? longStopPrice: na )
+// if(isStoplossShort)
+//     strategy.exit("Stop Loss Short", "SHORT", loss = stoplossShort, stop = enableShortTraillingstop? shortTraillingStopPerc: na )
+
+if(isStoplossLong)
+    strategy.exit("Stop Loss Long", "LONG",  loss = stoplossLong, trail_points=isTakeprofitLong? trail_points_long: na, trail_offset= isTakeprofitLong? trail_points_long: na)
+
+// if(isStoplossLong)
+//     strategy.exit("Stop Loss Long", "LONG",  loss = stoplossLong)
+
+    
+// Exit condition: 10-bar EMA falls under 30-bar EMA
+// exitLong = crossunder(ema(close, 10), ema(close, 30))
+
+// // Exit 'EL' trade whenever exit condition happens
+// strategy.close(id="LONG", when=longExit)
+if(isStoplossShort)
+    strategy.exit("Stop Loss Short", "SHORT", loss = stoplossShort, trail_points=isTakeprofitShort? trail_points_short: na, trail_offset= (isTakeprofitShort? trail_points_short: na) )
+
+
+
+
+

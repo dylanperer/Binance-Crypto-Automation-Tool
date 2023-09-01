@@ -1,0 +1,13 @@
+{
+  "TICKER": "ETHUSDT",
+  "INTERVAL": "1m",
+  "TIME": "2023-08-31T00:30:00Z",
+  "ACTION": "buy",
+  "BAR": {
+    "close": "100",
+    "open": "80",
+    "high": "120",
+    "low": "72",
+    "volume": "99999"
+  }
+}

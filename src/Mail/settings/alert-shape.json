@@ -1,0 +1,16 @@
+{
+  "TICKER": "{{ticker}}",
+  "INTERVAL": "{{interval}}",
+  "TIME": "{{timenow}}",
+  "ACTION": "{{strategy.order.action}}",
+  "BAR": {
+    "close": "{{close}}",
+    "open": "{{open}}",
+    "high": "{{high}}",
+    "low": "{{low}}",
+    "time": "{{time}}",
+    "volume": "{{volume}}"
+  }
+}
+
+

@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./cryp-trader.db"
+}
+
+model Alert {
+  id                              Int      @id @default(autoincrement())
+  uid                             DateTime @unique(map: "sqlite_autoindex_Alert_1")
+  coin                            String
+  side                            String
+  price                           Float
+  rawMessage                      String
+  receivedAt                      DateTime
+  createdAt                       DateTime @default(now())
+  tradeComplete                   Boolean  @default(false)
+  delay                           Int
+  Trade_Trade_exitAlertIdToAlert  Trade[]  @relation("Trade_exitAlertIdToAlert")
+  Trade_Trade_entryAlertIdToAlert Trade[]  @relation("Trade_entryAlertIdToAlert")
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  module    String
+  action    String
+  logLevel  String
+  context   String?
+  createdAt DateTime @default(now())
+}
+
+model Trade {
+  id                              Int      @id @default(autoincrement())
+  baseCoin                        String
+  symbol                          String
+  side                            String
+  margin                          Float?
+  status                          String
+  entryAlertId                    Int
+  entryAlertPrice                 Float?
+  entryActualPrice                Float?
+  entryTradeFee                   Float?
+  exitAlertId                     Int?
+  exitAlertPrice                  Float?
+  exitActualPrice                 Float?
+  exitTradeFee                    Float?
+  entryWalletBalance              Float?
+  exitWalletBalance               Float?
+  profit                          Float?
+  actualProfit                    Float?
+  createdAt                       DateTime @default(now())
+  Alert_Trade_exitAlertIdToAlert  Alert?   @relation("Trade_exitAlertIdToAlert", fields: [exitAlertId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Alert_Trade_entryAlertIdToAlert Alert    @relation("Trade_entryAlertIdToAlert", fields: [entryAlertId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  hasEnded  String
+  endAt     DateTime?
+}
