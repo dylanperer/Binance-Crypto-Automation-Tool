@@ -1,5 +1,3 @@
-import { serverSuccess, ModuleType, ActionType, serverError } from "../logger";
-
 export interface ITradeSettings {
   baseCoin: string;
   symbol: string;

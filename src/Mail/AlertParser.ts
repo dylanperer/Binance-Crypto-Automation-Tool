@@ -1,12 +1,6 @@
 import { prisma } from "../../prisma/prisma";
 import { Alert, Prisma, PrismaClient } from "@prisma/client";
-import {
-  ActionType,
-  ModuleType,
-  serverError,
-  serverInfo,
-  serverVerbose,
-} from "../logger";
+import { ModuleType, serverError, serverInfo, serverVerbose } from "../logger";
 import { MainClient } from "binance";
 import { findLowestAsk } from "../Binance/Market";
 import { getTradeSettings } from "../Binance/TradeSettings";
@@ -71,14 +65,16 @@ export const parseAlert = async (
     if (alert?.uid) {
       serverInfo(
         ModuleType.Mail,
-        ActionType.alertCreation,
-        `${JSON.stringify(alert)}`
+        `Alert creation was successful. info: ${JSON.stringify(alert)}`
       );
 
       console.log("@TODO");
     }
-  } catch (error: any) {
-    serverError(ModuleType.Mail, ActionType.alertParse, error.message);
+  } catch (exception: any) {
+    serverError(
+      ModuleType.Mail,
+      `Alert creation was unsuccessful. Exception: ${exception.message}`
+    );
   }
 };
 
@@ -110,7 +106,6 @@ const createAlert = async (
       const { symbol } = getTradeSettings();
 
       const lowest = await findLowestAsk(binanceClient, symbol);
-      serverVerbose(ModuleType.Binance, ActionType.findLowestAsk, `${lowest}`);
 
       const updatedAlert = await _tx.alert.update({
         where: { uid: createdAlert.uid },
@@ -121,50 +116,14 @@ const createAlert = async (
 
       return updatedAlert;
     });
-  } catch (error: any) {
-    if (error.code === "P2002") {
-      serverVerbose(
-        ModuleType.Mail,
-        ActionType.alertParse,
-        `Duplicate alert - ignoring...`
-      );
+  } catch (exception: any) {
+    if (exception.code === "P2002") {
+      serverVerbose(ModuleType.Mail, `Duplicate alert - ignoring...`);
     } else {
-      serverError(ModuleType.Mail, ActionType.alertCreation, error.message);
+      serverError(
+        ModuleType.Mail,
+        `Alert creation was unsuccessful. Exception: ${exception.message}`
+      );
     }
   }
 };
-//     prisma.alert.create({
-//       data: {
-//         uid: TIME,
-//         coin: TICKER,
-//         side: ACTION,
-//         price: -1,
-//         rawMessage: rawText,
-//         tradeComplete: false,
-//         receivedAt: receivedAt,
-//         createdAt: new Date(),
-//         delay: delay,
-//       },
-//     }),
-//     new Promise(async (resolve, reject) => {
-//       try {
-//         const { symbol } = getTradeSettings();
-
-//         const lowest = await findLowestAsk(binanceClient, symbol);
-//         serverVerbose(
-//           ModuleType.Binance,
-//           ActionType.findLowestAsk,
-//           `${lowest}`
-//         );
-//       } catch (error: any) {
-//         throw new Error(
-//           `Critical! Failed to get price-book to create alert ${error.message}`
-//         );
-//       }
-//     })
-//   )
-//   ]);
-//   console.log("Transaction completed successfully.");
-// } catch (error) {
-//   console.error("Error performing transaction:", error);
-// }

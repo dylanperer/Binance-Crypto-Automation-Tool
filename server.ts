@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { startMailListener } from "./src/Mail/Mail";
 import { getBinanceClient } from "./src/Binance/Binance";
-import { ActionType, ModuleType, serverError } from "./src/logger";
+import { ModuleType, serverError } from "./src/logger";
 dotenv.config();
 
 const configureServer = async () => {
@@ -27,7 +27,7 @@ const configureServer = async () => {
 
     //  console.log(a);
   } catch (error: any) {
-    serverError(ModuleType.Server, ActionType.serverStart, `${error.message}`);
+    serverError(ModuleType.Server, `${error.message}`);
   }
 };
 

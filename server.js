@@ -37,7 +37,7 @@ const configureServer = () => __awaiter(void 0, void 0, void 0, function* () {
         //  console.log(a);
     }
     catch (error) {
-        (0, logger_1.serverError)(logger_1.ModuleType.Server, logger_1.ActionType.serverStart, `${error.message}`);
+        (0, logger_1.serverError)(logger_1.ModuleType.Server, `${error.message}`);
     }
 });
 const main = () => __awaiter(void 0, void 0, void 0, function* () {

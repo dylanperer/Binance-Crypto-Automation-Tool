@@ -11,15 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startMailListener = void 0;
 const AlertParser_1 = require("./AlertParser");
-const MailConfiguration_1 = require("./MailConfiguration");
+const MailConfiguration_1 = require("./settings/MailConfiguration");
 //@ts-ignore
 const mail_listener5_1 = require("mail-listener5");
+const logger_1 = require("../logger");
 const attachMailListener = (binanceClient) => __awaiter(void 0, void 0, void 0, function* () {
     const configuration = (0, MailConfiguration_1.getMailConfiguration)();
     const mailListener = new mail_listener5_1.MailListener(configuration);
     mailListener.start();
-    mailListener.on("error", () => attachMailListener(binanceClient));
+    mailListener.on("error", () => process.exit(1));
     mailListener.on("server:connected", () => {
+        (0, logger_1.serverVerbose)(logger_1.ModuleType.Mail, 'Connection to mail server was successful.');
         mailListener.on("mail", (mail) => onMail(binanceClient, mail));
     });
 });

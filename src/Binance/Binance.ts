@@ -1,5 +1,5 @@
 import { MainClient, USDMClient } from "binance";
-import { ActionType, ModuleType, serverError, serverSuccess } from "../logger";
+import { ModuleType, serverError, serverSuccess } from "../logger";
 import { getTradeSettings } from "./TradeSettings";
 import { findLowestAsk } from "./Market";
 import { getCoinAsset } from "./Account";
@@ -16,15 +16,18 @@ export const getBinanceClient = async (): Promise<MainClient | null> => {
       api_secret: apiSecret,
     });
 
-    const tradeSettings  = getTradeSettings();
+    const tradeSettings = getTradeSettings();
 
     findLowestAsk(client, tradeSettings.symbol);
 
-    serverSuccess(ModuleType.Binance, ActionType.connectBinance);
+    serverSuccess(ModuleType.Binance, "Connection to binance successful.");
 
     return client;
-  } catch (e: any) {
-    serverError(ModuleType.Binance, ActionType.connectBinance, e.message);
+  } catch (exception: any) {
+    serverError(
+      ModuleType.Binance,
+      `Connection to binance unsuccessful. exception:${exception.message}`
+    );
   }
   return null;
 };

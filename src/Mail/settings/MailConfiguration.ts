@@ -28,7 +28,7 @@ export const getMailConfiguration = () => {
     mailbox: "INBOX",
     searchFilter: ["UNSEEN"],
     markSeen: true,
-    fetchUnreadOnStart: false,
+    fetchUnreadOnStart: true,
     attachments: false,
   };
 };

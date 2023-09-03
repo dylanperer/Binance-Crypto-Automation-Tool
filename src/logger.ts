@@ -14,34 +14,6 @@ export enum ModuleType {
   Database = "Database",
 }
 
-export enum ActionType {
-  addMailListener = "Attaching mail listener",
-  mailListenerRefresh = "Mail listener refreshed",
-  onReceiveMail = "Receiving mail",
-  mailError = "Mail error",
-  mailRestart = "Restarting listener",
-  mailRefresh = "Mail listener refreshing...",
-  alertParse = "Parsing alert",
-  alertCreation = "Alert creation",
-
-  serverStart = "String server",
-  serverError = "Server error",
-
-  apiStarted = "Starting express api",
-  apiError = "Express error",
-  apiEndpoint = "Express endpoint",
-
-  connectDatabase = "Connecting to database",
-  databaseError = "Database error",
-  databaseInsert = "Inserting into database",
-
-  connectBinance = "Connecting to binance",
-  findLowestAsk = "Find lowest Ask",
-  tradeConfiguration = "Configuring trade settings",
-  createTrade = "Create trade",
-  placeOrder = "Place order",
-}
-
 export enum LogType {
   info = "[Info]",
   warn = "[Warning]",
@@ -52,14 +24,13 @@ export enum LogType {
 
 export interface IServerLog {
   module: ModuleType;
-  action: ActionType;
   context?: string;
   logLevel?: LogType;
 }
 
 const writeServerLogToCsv = (serverLog: IServerLog, filePath: string): void => {
   const headerRow = "module,action,context,logLevel\n";
-  const dataRow = `${serverLog.module},${serverLog.action},${
+  const dataRow = `${serverLog.module},${
     serverLog.context ?? ""
   },${serverLog.logLevel ?? ""}\n`;
 
@@ -89,7 +60,6 @@ export const readServerLogFromCsv = async (
   for await (const record of records) {
     const serverLog: IServerLog = {
       module: record.module,
-      action: record.action,
       context: record.context || undefined,
       logLevel: record.logLevel || undefined,
     };
@@ -101,11 +71,10 @@ export const readServerLogFromCsv = async (
 
 const Log = (
   module: ModuleType,
-  action: ActionType,
   context?: string,
   logLevel?: LogType
 ) => {
-  const str = buildLogStr(module, action, logLevel, context);
+  const str = buildLogStr(module, logLevel, context);
 
   const _str = `> ${str}`;
 
@@ -154,13 +123,12 @@ const createLog = (log: any): Promise<Log> => {
 
 const buildLogStr = (
   module: ModuleType,
-  action: ActionType,
   logLevel?: LogType,
   context?: string
 ) => {
   const formattedTime = moment(new Date()).format("DD/MM/YYYY h:mm:ss");
 
-  const str = `${formattedTime} [${module.toString()}] [${action.toString()}] ${
+  const str = `${formattedTime} [${module.toString()}] ${
     context ? context.concat(".") : ""
   }`;
 
@@ -169,7 +137,7 @@ const buildLogStr = (
       .create({
         data: {
           module: module.toString(),
-          action: action.toString(),
+          action: '',
           logLevel: logLevel?.toString() || LogType.info.toString(),
           context: context || null,
         },
@@ -190,40 +158,35 @@ const buildLogStr = (
 };
 export const serverError = (
   module: ModuleType,
-  action: ActionType,
   context?: string
 ) => {
-  Log(module, action, context, LogType.error);
+  Log(module, context, LogType.error);
 };
 
 export const serverInfo = (
   module: ModuleType,
-  action: ActionType,
   context?: string
 ) => {
-  Log(module, action, context, LogType.info);
+  Log(module, context, LogType.info);
 };
 
 export const serverWarn = (
   module: ModuleType,
-  action: ActionType,
   context?: string
 ) => {
-  Log(module, action, context, LogType.warn);
+  Log(module, context, LogType.warn);
 };
 
 export const serverSuccess = (
   module: ModuleType,
-  action: ActionType,
   context?: string
 ) => {
-  Log(module, action, context, LogType.success);
+  Log(module, context, LogType.success);
 };
 
 export const serverVerbose = (
   module: ModuleType,
-  action: ActionType,
   context?: string
 ) => {
-  Log(module, action, context, LogType.verbose);
+  Log(module, context, LogType.verbose);
 };

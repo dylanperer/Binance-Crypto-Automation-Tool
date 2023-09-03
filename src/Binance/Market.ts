@@ -1,5 +1,5 @@
 import { MainClient } from "binance";
-import { ActionType, ModuleType, serverError } from "../logger";
+import { ModuleType, serverError, serverVerbose } from "../logger";
 
 export const findLowestAsk = async (client: MainClient, symbol: string) => {
   try {
@@ -7,10 +7,6 @@ export const findLowestAsk = async (client: MainClient, symbol: string) => {
       symbol: symbol,
       limit: 500,
     });
-
-    if (!orderBook || !orderBook.asks || orderBook.asks.length === 0) {
-      throw new Error("fetching order book error");
-    }
 
     const asks = orderBook.asks;
     let lowestAsk = asks[0];
@@ -22,8 +18,15 @@ export const findLowestAsk = async (client: MainClient, symbol: string) => {
       }
     }
 
+    serverVerbose(
+      ModuleType.Binance,
+      `Request to finding lowest ask was successful ${lowestAsk[0]}`
+    );
     return lowestAsk[0];
-  } catch (e:any) {
-    serverError(ModuleType.Binance, ActionType.findLowestAsk, `${e.message}`)
+  } catch (exception: any) {
+    serverError(
+      ModuleType.Binance,
+      `Request to finding lowest ask was unsuccessful. Exception: ${exception.message}`
+    );
   }
 };

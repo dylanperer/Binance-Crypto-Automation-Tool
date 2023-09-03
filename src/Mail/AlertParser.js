@@ -41,12 +41,12 @@ const parseAlert = (binanceClient, rawText) => __awaiter(void 0, void 0, void 0,
         const diffInSeconds = Math.floor(delay / 1000);
         const alert = yield createAlert(binanceClient, rawText, parsedMessageAsAlert, receivedAt, diffInSeconds);
         if (alert === null || alert === void 0 ? void 0 : alert.uid) {
-            (0, logger_1.serverInfo)(logger_1.ModuleType.Mail, logger_1.ActionType.alertCreation, `${JSON.stringify(alert)}`);
+            (0, logger_1.serverInfo)(logger_1.ModuleType.Mail, `Alert creation was successful. info: ${JSON.stringify(alert)}`);
             console.log("@TODO");
         }
     }
-    catch (error) {
-        (0, logger_1.serverError)(logger_1.ModuleType.Mail, logger_1.ActionType.alertParse, error.message);
+    catch (exception) {
+        (0, logger_1.serverError)(logger_1.ModuleType.Mail, `Alert creation was unsuccessful. Exception: ${exception.message}`);
     }
 });
 exports.parseAlert = parseAlert;
@@ -69,7 +69,6 @@ const createAlert = (binanceClient, rawText, dieselize, receivedAt, delay) => __
             });
             const { symbol } = (0, TradeSettings_1.getTradeSettings)();
             const lowest = yield (0, Market_1.findLowestAsk)(binanceClient, symbol);
-            (0, logger_1.serverVerbose)(logger_1.ModuleType.Binance, logger_1.ActionType.findLowestAsk, `${lowest}`);
             const updatedAlert = yield _tx.alert.update({
                 where: { uid: createdAlert.uid },
                 data: {
@@ -79,46 +78,12 @@ const createAlert = (binanceClient, rawText, dieselize, receivedAt, delay) => __
             return updatedAlert;
         }));
     }
-    catch (error) {
-        if (error.code === "P2002") {
-            (0, logger_1.serverVerbose)(logger_1.ModuleType.Mail, logger_1.ActionType.alertParse, `Duplicate alert - ignoring...`);
+    catch (exception) {
+        if (exception.code === "P2002") {
+            (0, logger_1.serverVerbose)(logger_1.ModuleType.Mail, `Duplicate alert - ignoring...`);
         }
         else {
-            (0, logger_1.serverError)(logger_1.ModuleType.Mail, logger_1.ActionType.alertCreation, error.message);
+            (0, logger_1.serverError)(logger_1.ModuleType.Mail, `Alert creation was unsuccessful. Exception: ${exception.message}`);
         }
     }
 });
-//     prisma.alert.create({
-//       data: {
-//         uid: TIME,
-//         coin: TICKER,
-//         side: ACTION,
-//         price: -1,
-//         rawMessage: rawText,
-//         tradeComplete: false,
-//         receivedAt: receivedAt,
-//         createdAt: new Date(),
-//         delay: delay,
-//       },
-//     }),
-//     new Promise(async (resolve, reject) => {
-//       try {
-//         const { symbol } = getTradeSettings();
-//         const lowest = await findLowestAsk(binanceClient, symbol);
-//         serverVerbose(
-//           ModuleType.Binance,
-//           ActionType.findLowestAsk,
-//           `${lowest}`
-//         );
-//       } catch (error: any) {
-//         throw new Error(
-//           `Critical! Failed to get price-book to create alert ${error.message}`
-//         );
-//       }
-//     })
-//   )
-//   ]);
-//   console.log("Transaction completed successfully.");
-// } catch (error) {
-//   console.error("Error performing transaction:", error);
-// }

@@ -27,11 +27,11 @@ const getBinanceClient = () => __awaiter(void 0, void 0, void 0, function* () {
         });
         const tradeSettings = (0, TradeSettings_1.getTradeSettings)();
         (0, Market_1.findLowestAsk)(client, tradeSettings.symbol);
-        (0, logger_1.serverSuccess)(logger_1.ModuleType.Binance, logger_1.ActionType.connectBinance);
+        (0, logger_1.serverSuccess)(logger_1.ModuleType.Binance, "Connection to binance successful.");
         return client;
     }
-    catch (e) {
-        (0, logger_1.serverError)(logger_1.ModuleType.Binance, logger_1.ActionType.connectBinance, e.message);
+    catch (exception) {
+        (0, logger_1.serverError)(logger_1.ModuleType.Binance, `Connection to binance unsuccessful. exception:${exception.message}`);
     }
     return null;
 });

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serverVerbose = exports.serverSuccess = exports.serverWarn = exports.serverInfo = exports.serverError = exports.readServerLogFromCsv = exports.LogType = exports.ActionType = exports.ModuleType = void 0;
+exports.serverVerbose = exports.serverSuccess = exports.serverWarn = exports.serverInfo = exports.serverError = exports.readServerLogFromCsv = exports.LogType = exports.ModuleType = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const moment_1 = __importDefault(require("moment"));
 const fs = __importStar(require("fs"));
@@ -56,30 +56,6 @@ var ModuleType;
     ModuleType["Api"] = "Express";
     ModuleType["Database"] = "Database";
 })(ModuleType = exports.ModuleType || (exports.ModuleType = {}));
-var ActionType;
-(function (ActionType) {
-    ActionType["addMailListener"] = "Attaching mail listener";
-    ActionType["mailListenerRefresh"] = "Mail listener refreshed";
-    ActionType["onReceiveMail"] = "Receiving mail";
-    ActionType["mailError"] = "Mail error";
-    ActionType["mailRestart"] = "Restarting listener";
-    ActionType["mailRefresh"] = "Mail listener refreshing...";
-    ActionType["alertParse"] = "Parsing alert";
-    ActionType["alertCreation"] = "Alert creation";
-    ActionType["serverStart"] = "String server";
-    ActionType["serverError"] = "Server error";
-    ActionType["apiStarted"] = "Starting express api";
-    ActionType["apiError"] = "Express error";
-    ActionType["apiEndpoint"] = "Express endpoint";
-    ActionType["connectDatabase"] = "Connecting to database";
-    ActionType["databaseError"] = "Database error";
-    ActionType["databaseInsert"] = "Inserting into database";
-    ActionType["connectBinance"] = "Connecting to binance";
-    ActionType["findLowestAsk"] = "Find lowest Ask";
-    ActionType["tradeConfiguration"] = "Configuring trade settings";
-    ActionType["createTrade"] = "Create trade";
-    ActionType["placeOrder"] = "Place order";
-})(ActionType = exports.ActionType || (exports.ActionType = {}));
 var LogType;
 (function (LogType) {
     LogType["info"] = "[Info]";
@@ -91,7 +67,7 @@ var LogType;
 const writeServerLogToCsv = (serverLog, filePath) => {
     var _a, _b;
     const headerRow = "module,action,context,logLevel\n";
-    const dataRow = `${serverLog.module},${serverLog.action},${(_a = serverLog.context) !== null && _a !== void 0 ? _a : ""},${(_b = serverLog.logLevel) !== null && _b !== void 0 ? _b : ""}\n`;
+    const dataRow = `${serverLog.module},${(_a = serverLog.context) !== null && _a !== void 0 ? _a : ""},${(_b = serverLog.logLevel) !== null && _b !== void 0 ? _b : ""}\n`;
     // If the file already exists, append the data to it; otherwise, create a new file.
     if (fs.existsSync(filePath)) {
         fs.appendFileSync(filePath, dataRow);
@@ -119,7 +95,6 @@ const readServerLogFromCsv = (filePath) => __awaiter(void 0, void 0, void 0, fun
                 const record = _c;
                 const serverLog = {
                     module: record.module,
-                    action: record.action,
                     context: record.context || undefined,
                     logLevel: record.logLevel || undefined,
                 };
@@ -140,8 +115,8 @@ const readServerLogFromCsv = (filePath) => __awaiter(void 0, void 0, void 0, fun
     return serverLogs;
 });
 exports.readServerLogFromCsv = readServerLogFromCsv;
-const Log = (module, action, context, logLevel) => {
-    const str = buildLogStr(module, action, logLevel, context);
+const Log = (module, context, logLevel) => {
+    const str = buildLogStr(module, logLevel, context);
     const _str = `> ${str}`;
     const isVerbose = process.env.VERBOSE === "true";
     switch (logLevel) {
@@ -183,15 +158,15 @@ const createLog = (log) => {
         });
     });
 };
-const buildLogStr = (module, action, logLevel, context) => {
+const buildLogStr = (module, logLevel, context) => {
     const formattedTime = (0, moment_1.default)(new Date()).format("DD/MM/YYYY h:mm:ss");
-    const str = `${formattedTime} [${module.toString()}] [${action.toString()}] ${context ? context.concat(".") : ""}`;
+    const str = `${formattedTime} [${module.toString()}] ${context ? context.concat(".") : ""}`;
     new Promise((resolve, reject) => {
         prisma_1.prisma.log
             .create({
             data: {
                 module: module.toString(),
-                action: action.toString(),
+                action: '',
                 logLevel: (logLevel === null || logLevel === void 0 ? void 0 : logLevel.toString()) || LogType.info.toString(),
                 context: context || null,
             },
@@ -209,23 +184,23 @@ const buildLogStr = (module, action, logLevel, context) => {
     });
     return str;
 };
-const serverError = (module, action, context) => {
-    Log(module, action, context, LogType.error);
+const serverError = (module, context) => {
+    Log(module, context, LogType.error);
 };
 exports.serverError = serverError;
-const serverInfo = (module, action, context) => {
-    Log(module, action, context, LogType.info);
+const serverInfo = (module, context) => {
+    Log(module, context, LogType.info);
 };
 exports.serverInfo = serverInfo;
-const serverWarn = (module, action, context) => {
-    Log(module, action, context, LogType.warn);
+const serverWarn = (module, context) => {
+    Log(module, context, LogType.warn);
 };
 exports.serverWarn = serverWarn;
-const serverSuccess = (module, action, context) => {
-    Log(module, action, context, LogType.success);
+const serverSuccess = (module, context) => {
+    Log(module, context, LogType.success);
 };
 exports.serverSuccess = serverSuccess;
-const serverVerbose = (module, action, context) => {
-    Log(module, action, context, LogType.verbose);
+const serverVerbose = (module, context) => {
+    Log(module, context, LogType.verbose);
 };
 exports.serverVerbose = serverVerbose;

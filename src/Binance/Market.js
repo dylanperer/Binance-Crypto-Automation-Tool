@@ -17,9 +17,6 @@ const findLowestAsk = (client, symbol) => __awaiter(void 0, void 0, void 0, func
             symbol: symbol,
             limit: 500,
         });
-        if (!orderBook || !orderBook.asks || orderBook.asks.length === 0) {
-            throw new Error("fetching order book error");
-        }
         const asks = orderBook.asks;
         let lowestAsk = asks[0];
         for (let i = 1; i < asks.length; i++) {
@@ -28,10 +25,11 @@ const findLowestAsk = (client, symbol) => __awaiter(void 0, void 0, void 0, func
                 lowestAsk = currentAsk;
             }
         }
+        (0, logger_1.serverVerbose)(logger_1.ModuleType.Binance, `Request to finding lowest ask was successful ${lowestAsk[0]}`);
         return lowestAsk[0];
     }
-    catch (e) {
-        (0, logger_1.serverError)(logger_1.ModuleType.Binance, logger_1.ActionType.findLowestAsk, `${e.message}`);
+    catch (exception) {
+        (0, logger_1.serverError)(logger_1.ModuleType.Binance, `Request to finding lowest ask was unsuccessful. Exception: ${exception.message}`);
     }
 });
 exports.findLowestAsk = findLowestAsk;
