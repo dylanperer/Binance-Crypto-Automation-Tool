@@ -21,7 +21,7 @@ export const getBinanceClient = async (): Promise<MainClient | null> => {
 
     findLowestAsk(client, tradeSettings.symbol);
 
-    serverSuccess(ModuleType.Binance, "Connection to binance successful.");
+    serverSuccess(ModuleType.Binance, "Connection to binance was successful.");
 
     return client;
   } catch (exception: any) {
