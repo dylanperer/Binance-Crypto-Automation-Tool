@@ -24,6 +24,7 @@ const getBinanceClient = () => __awaiter(void 0, void 0, void 0, function* () {
         const client = new binance_1.MainClient({
             api_key: apiKey,
             api_secret: apiSecret,
+            baseUrl: 'https://api3.binance.com'
         });
         const tradeSettings = (0, TradeSettings_1.getTradeSettings)();
         (0, Market_1.findLowestAsk)(client, tradeSettings.symbol);

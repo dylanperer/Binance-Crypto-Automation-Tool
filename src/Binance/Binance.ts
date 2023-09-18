@@ -14,6 +14,7 @@ export const getBinanceClient = async (): Promise<MainClient | null> => {
     const client = new MainClient({
       api_key: apiKey,
       api_secret: apiSecret,
+      baseUrl: 'https://api3.binance.com'
     });
 
     const tradeSettings = getTradeSettings();
