@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serverVerbose = exports.serverSuccess = exports.serverWarn = exports.serverInfo = exports.serverError = exports.readServerLogFromCsv = exports.LogType = exports.ModuleType = void 0;
+exports.serverVerbose = exports.serverSuccess = exports.serverWarn = exports.serverInfo = exports.serverError = exports.readServerLogFromCsv = exports.clearLogs = exports.LogType = exports.ModuleType = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const moment_1 = __importDefault(require("moment"));
 const fs = __importStar(require("fs"));
@@ -55,6 +55,7 @@ var ModuleType;
     ModuleType["Server"] = "Server";
     ModuleType["Api"] = "Express";
     ModuleType["Database"] = "Database";
+    ModuleType["Log"] = "Log";
 })(ModuleType = exports.ModuleType || (exports.ModuleType = {}));
 var LogType;
 (function (LogType) {
@@ -64,6 +65,16 @@ var LogType;
     LogType["success"] = "[Successful]";
     LogType["verbose"] = "[Verbose]";
 })(LogType = exports.LogType || (exports.LogType = {}));
+const clearLogs = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield prisma_1.prisma.log.deleteMany();
+        (0, exports.serverVerbose)(ModuleType.Log, "Successfully cleared previous logs...");
+    }
+    catch (ex) {
+        (0, exports.serverError)(ModuleType.Log, `Failure clearing previous logs. ex:${ex.message}`);
+    }
+});
+exports.clearLogs = clearLogs;
 const writeServerLogToCsv = (serverLog, filePath) => {
     var _a, _b;
     const headerRow = "module,action,context,logLevel\n";
@@ -166,7 +177,7 @@ const buildLogStr = (module, logLevel, context) => {
             .create({
             data: {
                 module: module.toString(),
-                action: '',
+                action: "",
                 logLevel: (logLevel === null || logLevel === void 0 ? void 0 : logLevel.toString()) || LogType.info.toString(),
                 context: context || null,
             },

@@ -12,6 +12,7 @@ export enum ModuleType {
   Server = "Server",
   Api = "Express",
   Database = "Database",
+  Log = "Log",
 }
 
 export enum LogType {
@@ -28,11 +29,20 @@ export interface IServerLog {
   logLevel?: LogType;
 }
 
+export const clearLogs = async () => {
+  try {
+    await prisma.log.deleteMany();
+    serverVerbose(ModuleType.Log, "Successfully cleared previous logs...");
+  } catch (ex: any) {
+    serverError(ModuleType.Log, `Failure clearing previous logs. ex:${ex.message}`);
+  }
+};
+
 const writeServerLogToCsv = (serverLog: IServerLog, filePath: string): void => {
   const headerRow = "module,action,context,logLevel\n";
-  const dataRow = `${serverLog.module},${
-    serverLog.context ?? ""
-  },${serverLog.logLevel ?? ""}\n`;
+  const dataRow = `${serverLog.module},${serverLog.context ?? ""},${
+    serverLog.logLevel ?? ""
+  }\n`;
 
   // If the file already exists, append the data to it; otherwise, create a new file.
   if (fs.existsSync(filePath)) {
@@ -69,11 +79,7 @@ export const readServerLogFromCsv = async (
   return serverLogs;
 };
 
-const Log = (
-  module: ModuleType,
-  context?: string,
-  logLevel?: LogType
-) => {
+const Log = (module: ModuleType, context?: string, logLevel?: LogType) => {
   const str = buildLogStr(module, logLevel, context);
 
   const _str = `> ${str}`;
@@ -137,7 +143,7 @@ const buildLogStr = (
       .create({
         data: {
           module: module.toString(),
-          action: '',
+          action: "",
           logLevel: logLevel?.toString() || LogType.info.toString(),
           context: context || null,
         },
@@ -156,37 +162,22 @@ const buildLogStr = (
 
   return str;
 };
-export const serverError = (
-  module: ModuleType,
-  context?: string
-) => {
+export const serverError = (module: ModuleType, context?: string) => {
   Log(module, context, LogType.error);
 };
 
-export const serverInfo = (
-  module: ModuleType,
-  context?: string
-) => {
+export const serverInfo = (module: ModuleType, context?: string) => {
   Log(module, context, LogType.info);
 };
 
-export const serverWarn = (
-  module: ModuleType,
-  context?: string
-) => {
+export const serverWarn = (module: ModuleType, context?: string) => {
   Log(module, context, LogType.warn);
 };
 
-export const serverSuccess = (
-  module: ModuleType,
-  context?: string
-) => {
+export const serverSuccess = (module: ModuleType, context?: string) => {
   Log(module, context, LogType.success);
 };
 
-export const serverVerbose = (
-  module: ModuleType,
-  context?: string
-) => {
+export const serverVerbose = (module: ModuleType, context?: string) => {
   Log(module, context, LogType.verbose);
 };

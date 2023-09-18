@@ -3,7 +3,7 @@ import { parseAlert } from "./AlertParser";
 import { getMailConfiguration } from "./settings/MailConfiguration";
 //@ts-ignore
 import { MailListener } from "mail-listener5";
-import { ModuleType, serverVerbose } from "../logger";
+import { ModuleType, serverError, serverVerbose } from "../logger";
 
 const attachMailListener = async (binanceClient: MainClient) => {
   const configuration = getMailConfiguration();
@@ -12,10 +12,13 @@ const attachMailListener = async (binanceClient: MainClient) => {
 
   mailListener.start();
 
-  mailListener.on("error", () => process.exit(1));
+  mailListener.on("error", (ex: any) => {
+    serverError(ModuleType.Mail, `Mail server connection error: ${ex.message}`);
+    process.exit(1);
+  });
 
   mailListener.on("server:connected", () => {
-    serverVerbose(ModuleType.Mail, 'Connection to mail server was successful.');
+    serverVerbose(ModuleType.Mail, "Connection to mail server was successful.");
     mailListener.on("mail", (mail: any) => onMail(binanceClient, mail));
   });
 };
