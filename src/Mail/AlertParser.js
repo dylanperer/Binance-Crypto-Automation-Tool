@@ -16,6 +16,7 @@ const Market_1 = require("../Binance/Market");
 const TradeSettings_1 = require("../Binance/TradeSettings");
 const getAlert = (subject) => {
     try {
+        console.log('@>>>>>>>>>>>>>>>', subject);
         return JSON.parse(subject);
     }
     catch (error) {

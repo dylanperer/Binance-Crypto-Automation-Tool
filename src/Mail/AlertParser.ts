@@ -4,9 +4,8 @@ import { ModuleType, serverError, serverInfo, serverVerbose } from "../logger";
 import { MainClient } from "binance";
 import { findLowestAsk } from "../Binance/Market";
 import { getTradeSettings } from "../Binance/TradeSettings";
-import { deserialize } from "v8";
 
-type AlertDieselize = {
+interface IAlert {
   TICKER: string;
   INTERVAL: string;
   TIME: Date;
@@ -20,11 +19,11 @@ type AlertDieselize = {
   };
 };
 
-export const getAlert = (subject: string): AlertDieselize | null => {
+export const getAlert = (subject: string): IAlert | null => {
   try {
-    return JSON.parse(subject) as AlertDieselize;
+    return JSON.parse(subject) as IAlert;
   } catch (error) {
-    throw new Error(`Failed to dieselize ${subject} as a alert; ex${error}`);
+    throw new Error(`Failed to deserialize ${subject} as a alert; ex${error}`);
   }
 };
 
@@ -81,7 +80,7 @@ export const parseAlert = async (
 const createAlert = async (
   binanceClient: MainClient,
   rawText: string,
-  dieselize: AlertDieselize,
+  dieselize: IAlert,
   receivedAt: Date,
   delay: number
 ) => {
