@@ -2,7 +2,7 @@ import { prisma } from "../../prisma/prisma";
 import { Alert, Prisma, PrismaClient } from "@prisma/client";
 import { ModuleType, serverError, serverInfo, serverVerbose } from "../logger";
 import { MainClient } from "binance";
-import { findLowestAsk } from "../Binance/Market";
+import { findLowestAsk, getPriceTicker } from "../Binance/Market";
 import { getTradeSettings } from "../Binance/TradeSettings";
 
 interface IAlert {
@@ -104,12 +104,12 @@ const createAlert = async (
 
       const { symbol } = getTradeSettings();
 
-      const lowest = await findLowestAsk(binanceClient, symbol);
+      const currentPrice = await getPriceTicker(binanceClient, symbol);
 
       const updatedAlert = await _tx.alert.update({
         where: { uid: createdAlert.uid },
         data: {
-          price: Number(lowest?.toString()),
+          price: Number(currentPrice?.toString()),
         },
       });
 

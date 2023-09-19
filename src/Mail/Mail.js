@@ -24,7 +24,7 @@ const attachMailListener = (binanceClient) => __awaiter(void 0, void 0, void 0, 
         process.exit(1);
     });
     mailListener.on("server:connected", () => {
-        (0, logger_1.serverVerbose)(logger_1.ModuleType.Mail, "Connection to mail server was successful.");
+        (0, logger_1.serverSuccess)(logger_1.ModuleType.Mail, "Connection to mail server was successful.");
         mailListener.on("mail", (mail) => onMail(binanceClient, mail));
     });
 });

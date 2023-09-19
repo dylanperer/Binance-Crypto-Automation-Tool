@@ -1,7 +1,7 @@
 import { MainClient, USDMClient } from "binance";
 import { ModuleType, serverError, serverSuccess } from "../logger";
 import { getTradeSettings } from "./TradeSettings";
-import { findLowestAsk } from "./Market";
+import { findLowestAsk, getPriceTicker } from "./Market";
 import { getCoinAsset } from "./Account";
 
 export const getBinanceClient = async (): Promise<MainClient | null> => {
@@ -19,7 +19,7 @@ export const getBinanceClient = async (): Promise<MainClient | null> => {
 
     const tradeSettings = getTradeSettings();
 
-    findLowestAsk(client, tradeSettings.symbol);
+    getPriceTicker(client, tradeSettings.symbol);
 
     serverSuccess(ModuleType.Binance, "Connection to binance was successful.");
 

@@ -1,7 +1,10 @@
-import { MainClient } from "binance";
+import { MainClient, SymbolPrice } from "binance";
 import { ModuleType, serverError, serverVerbose } from "../logger";
 
-export const findLowestAsk = async (client: MainClient, symbol: string) => {
+export const findLowestAsk = async (
+  client: MainClient,
+  symbol: string,
+) => {
   try {
     const orderBook = await client.getOrderBook({
       symbol: symbol,
@@ -27,6 +30,27 @@ export const findLowestAsk = async (client: MainClient, symbol: string) => {
     serverError(
       ModuleType.Binance,
       `Request to finding lowest ask was unsuccessful. Exception: ${exception.message}`
+    );
+  }
+};
+
+
+export const getPriceTicker = async (
+  client: MainClient,
+  symbol: string,
+) => {
+  try {
+    const ticker = await client.getSymbolPriceTicker({symbol: symbol}) as SymbolPrice;
+    ticker.price
+    serverVerbose(
+      ModuleType.Binance,
+      `Request to get price ticker was successful ${ticker.price}`
+    );
+    return ticker.price;
+  } catch (exception: any) {
+    serverError(
+      ModuleType.Binance,
+      `Request to get price ticker was unsuccessful. Exception: ${exception.message}`
     );
   }
 };

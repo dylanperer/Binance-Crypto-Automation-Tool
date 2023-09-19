@@ -14,13 +14,13 @@ const prisma_1 = require("../../prisma/prisma");
 const logger_1 = require("../logger");
 const Market_1 = require("../Binance/Market");
 const TradeSettings_1 = require("../Binance/TradeSettings");
+;
 const getAlert = (subject) => {
     try {
-        console.log('@>>>>>>>>>>>>>>>', subject);
         return JSON.parse(subject);
     }
     catch (error) {
-        throw new Error(`Failed to dieselize ${subject} as a alert; ex${error}`);
+        throw new Error(`Failed to deserialize ${subject} as a alert; ex${error}`);
     }
 };
 exports.getAlert = getAlert;
@@ -69,11 +69,11 @@ const createAlert = (binanceClient, rawText, dieselize, receivedAt, delay) => __
                 },
             });
             const { symbol } = (0, TradeSettings_1.getTradeSettings)();
-            const lowest = yield (0, Market_1.findLowestAsk)(binanceClient, symbol);
+            const currentPrice = yield (0, Market_1.getPriceTicker)(binanceClient, symbol);
             const updatedAlert = yield _tx.alert.update({
                 where: { uid: createdAlert.uid },
                 data: {
-                    price: Number(lowest === null || lowest === void 0 ? void 0 : lowest.toString()),
+                    price: Number(currentPrice === null || currentPrice === void 0 ? void 0 : currentPrice.toString()),
                 },
             });
             return updatedAlert;

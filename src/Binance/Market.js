@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findLowestAsk = void 0;
+exports.getPriceTicker = exports.findLowestAsk = void 0;
 const logger_1 = require("../logger");
 const findLowestAsk = (client, symbol) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -33,3 +33,15 @@ const findLowestAsk = (client, symbol) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.findLowestAsk = findLowestAsk;
+const getPriceTicker = (client, symbol) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const ticker = yield client.getSymbolPriceTicker({ symbol: symbol });
+        ticker.price;
+        (0, logger_1.serverVerbose)(logger_1.ModuleType.Binance, `Request to get price ticker was successful ${ticker.price}`);
+        return ticker.price;
+    }
+    catch (exception) {
+        (0, logger_1.serverError)(logger_1.ModuleType.Binance, `Request to get price ticker was unsuccessful. Exception: ${exception.message}`);
+    }
+});
+exports.getPriceTicker = getPriceTicker;

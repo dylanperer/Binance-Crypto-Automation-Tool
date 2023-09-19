@@ -27,8 +27,8 @@ const getBinanceClient = () => __awaiter(void 0, void 0, void 0, function* () {
             baseUrl: 'https://api3.binance.com'
         });
         const tradeSettings = (0, TradeSettings_1.getTradeSettings)();
-        (0, Market_1.findLowestAsk)(client, tradeSettings.symbol);
-        (0, logger_1.serverSuccess)(logger_1.ModuleType.Binance, "Connection to binance successful.");
+        (0, Market_1.getPriceTicker)(client, tradeSettings.symbol);
+        (0, logger_1.serverSuccess)(logger_1.ModuleType.Binance, "Connection to binance was successful.");
         return client;
     }
     catch (exception) {
